@@ -1,0 +1,32 @@
+[
+  {
+    "email": "a@gmail.com",
+    "password": "1234",
+    "post_link": "www1",
+    "message": "hello bol"
+  },
+  {
+    "email": "b@gmail.com",
+    "password": "2345",
+    "post_link": "www2",
+    "message": "hello bol"
+  },
+  {
+    "email": "c@gmail.com",
+    "password": "3456",
+    "post_link": "www3",
+    "message": "hello bol"
+  },
+  {
+    "email": "d@gmail.com",
+    "password": "4567",
+    "post_link": "www4",
+    "message": "hello bol"
+  },
+  {
+    "email": "q@gmail.com",
+    "password": "0987",
+    "post_link": "xyxx",
+    "message": "hello bot"
+  }
+]
