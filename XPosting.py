@@ -66,48 +66,15 @@ def post_function(post_link):
      driver.get(post_link)
      print('post loading...')
      time.sleep(random.randint(5,10))
-     driver.execute_script(f'window.scrollTo(0,300)')
+     driver.execute_script(f'window.scrollTo(0,250)')
      print('scroll the post')
      time.sleep(random.randint(2,5))
-     post_element = driver.execute_script("return document.querySelector('.css-175oi2r')")
-     post_element.click()
-     print('clicked on the Post')
-     like_button()
-     repost_button()
+    #  post_element = driver.execute_script("return document.querySelector('.css-175oi2r')")
+    #  post_element.click()
+    #  print('clicked on the Post')
      
 
-def like_button():
-     time.sleep(random.randint(5,12))
-     like_button =  driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div[1]/div[2]/div/div/div/div[3]/div')
-     print('Like pharr liya')
-     time.sleep(random.randint(5,8))
-     like_button.click()
-     print('Like button clicked by manual 2xpath')
-
-
-def repost_button():
-    time.sleep(random.randint(5,8))
-    repost_button = driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div[1]/div[2]/div/div/div/div[2]/div')
-    repost_button.click()
-    print('Repost button clicked By Xpath')
-    time.sleep(random.randint(3,5))
-    fi_click = driver.find_element(By.XPATH,'//*[@id="layers"]/div[3]/div/div/div/div[2]/div/div[3]/div/div/div/div')
-    fi_click.click()
-    print('Final repost button clicked by xpath')
-    time.sleep(random.randint(3,12))
-    print('repost  Done')
-    time.sleep(random.randint(4,6))
-   
-
-
-def comment_button():
-     time.sleep(random.randint(3,6))
-     element = driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div[1]/div[2]/div/div/div/div[1]/div')
-     element.click()
-     print('Commment Button clicked by manual Xpath')
-     time.sleep(random.randint(3,5))
-    
-         
+      
 def write_send_msg(message):
     msg_input = driver.execute_script("return document.activeElement;")
     msg_input.click()
@@ -174,24 +141,76 @@ def switch(case_numb):
 #  executed_cases.add(case)
 
 # executed_cases = set()
+def like_button():
+    time.sleep(random.randint(5,12))
+    print('find like button')
+    try:
+        like_button= driver.find_element(By.CSS_SELECTOR,'[data-testid="like"]')
+        print('like button found by special selector')
+        time.sleep(random.randint(2,5))
+        like_button.click()
+        print('Like button clicked by special selector')
+    except:
+       print('Already Liked')
+
+def repost_button():
+    time.sleep(random.randint(5,8))
+    try:
+        repost_button = driver.find_element(By.XPATH,"//div[@data-testid='retweet']")
+        repost_button.click()     
+        time.sleep(random.randint(3,5))
+        fi_click = driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div[2]/div/div[3]/div/div/div/div')
+        print('found by xpath')
+        fi_click.click()
+        print('Final repost button clicked ')
+        time.sleep(random.randint(3,12))
+    except:
+        print('ALready Reposted')
+    
+    finally:
+        print('repost  Done')
+        time.sleep(random.randint(4,6))
+
+def comment_button():
+    time.sleep(random.randint(3,6))
+    try:
+
+        element = driver.find_element(By.XPATH,'//*[@id="id__6w9o1amibzy"]/div[1]/div')
+        print('found by xpath')
+    except:
+        print('failed by xpath')
+        try:
+            element = driver.find_element(By.CSS_SELECTOR,'#id__6w9o1amibzy > div:nth-child(1) > div')
+            print('found by selector')
+        except:
+            print('failed by selector')
+            try:
+                element = driver.find_element(By.CSS_SELECTOR,'div[data-testid="reply"]')
+                print('found by special selector')
+            except:
+                print('failed by special selector')
+
+               
+    element.click()
+    print('Commment Button clicked by manual Xpath')
+    time.sleep(random.randint(3,5))
+
+
 def main():
     
 
 
     message = 'Discover monkey inside You\n Mface from MonkeysLIST is here Already\n #MLIST\n #MonkeysLIST '
-    post_link = "https://x.com/Degen_Corleone/status/1773048050346246375?s=20"
+    post_link = "https://x.com/Degen_Corleone/status/1773403082615120029?s=20"
     login_username = '_monkeypm'
     login_password = 'monkeypm@123'
-    post_hit = 0
 
 
     try:
-        login_to_twitter(login_username, login_password)
-
-        while True:
-            
-               
+            login_to_twitter(login_username, login_password)
+                           
             post_function(post_link)
+            like_button()
             comment_button()
             try:
                 write_send_msg(message)
@@ -210,3 +229,4 @@ def main():
 if __name__ == '__main__':
     
     main() 
+       
