@@ -176,6 +176,8 @@ def switch(case_numb):
 # executed_cases = set()
 def main():
     
+
+
     message = 'Discover monkey inside You\n Mface from MonkeysLIST is here Already\n #MLIST\n #MonkeysLIST '
     post_link = "https://x.com/Degen_Corleone/status/1773048050346246375?s=20"
     login_username = '_monkeypm'
@@ -189,26 +191,22 @@ def main():
         while True:
             
                
-            if post_hit == 1:  # Ensure to compare with string "False"
-                post_function(post_link)
-                comment_button()
-                try:
-                    write_send_msg(message)
-                    print('Comment Sent...')
-                except:
-                    print("Message not sent")
-                finally:
-                    post_hit = 0
-                    time.sleep(random.randint(3, 5))
-                    # Update post_hit in the request form
-                    continue
-            else:
-                print('random case')
-                case=int(random.randint(1,9))
-                switch(case)
-                continue
+            post_function(post_link)
+            comment_button()
+            try:
+                write_send_msg(message)
+                print('Comment Sent...')
+            except:
+                print("Message not sent")
+            finally:
+                time.sleep(random.randint(3, 5))
+                
     except:
        print('login failed')
+
+
+
+       
 if __name__ == '__main__':
     
     main() 
