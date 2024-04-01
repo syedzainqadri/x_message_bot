@@ -1,5 +1,3 @@
-# import mysql.connector
-# from mysql.connector import Error
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,24 +6,64 @@ import time
 from selenium.webdriver.common.keys import Keys
 import random
 import requests
+import json
 
 driver = webdriver.Chrome()
+
+def get_postman_data(api_key):
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+
+    # Replace 'YOUR_COLLECTION_ID' with the actual collection ID you want to retrieve
+    collection_id = '33908320-35644a5b-1ed3-455a-af10-2fffefd24b33'
+    url = f'https://api.postman.com/collections/33908320-c42cb38c-fcd7-4601-ba8e-a735d538b52b?access_key=PMAT-01HTDPNRS2X70QE1V4QXBXYWYM'
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
+        data = response.json()
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None
+
+def get_data_list():
+  postman_api_key = 'PMAK-660b181737c5cd0001fe771b-5432c38bc681d2e8cb8d34dcfe635bdead'
+  postman_data = get_postman_data(postman_api_key)
+  if postman_data:
+      print("Data retrieved successfully:")
+      extracted_data = []
+      collection_info = postman_data['collection']
+      items = collection_info['item']
+      for item in items:
+          request = item.get('request', {})
+          body = request.get('body', {})
+          form_data = body.get('formdata', [])
+          data_dict = {}
+          for entry in form_data:
+              data_dict[entry['key']] = entry['value']
+          extracted_data.append(data_dict)
+          return extracted_data[0]
 
 def login_to_twitter(login_username, login_password):
     try:
         driver.get("https://twitter.com/i/flow/login")
-        time.sleep(random.randint(15,20))
+        driver.maximize_window()
+        time.sleep(random.randint(15,30))
 
     # Enter username and submit
         input_element = driver.find_element(By.TAG_NAME, 'input')
         input_element.send_keys(login_username)
         print('Username Entered')
-        time.sleep(random.randint(15,20))
+        time.sleep(random.randint(15,30))
         input_element.send_keys(Keys.RETURN)
 
     # Wait for password field and submit
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, 'password')))
         password_element = driver.find_element(By.NAME, 'password')
+        time.sleep(3)
         password_element.send_keys(login_password)
         print('Password Entered')
         time.sleep(random.randint(5,8))
@@ -69,11 +107,7 @@ def post_function(post_link):
      driver.execute_script(f'window.scrollTo(0,250)')
      print('scroll the post')
      time.sleep(random.randint(2,5))
-    #  post_element = driver.execute_script("return document.querySelector('.css-175oi2r')")
-    #  post_element.click()
-    #  print('clicked on the Post')
      
-
       
 def write_send_msg(message):
     msg_input = driver.execute_script("return document.activeElement;")
@@ -138,9 +172,7 @@ def switch(case_numb):
   scrolling_func()
  else:
   print('numb out of limit')
-#  executed_cases.add(case)
 
-# executed_cases = set()
 def like_button():
     time.sleep(random.randint(5,12))
     print('find like button')
@@ -198,27 +230,44 @@ def comment_button():
 
 def main():
     
-
-
-    message = 'Discover monkey inside You\n Mface from MonkeysLIST is here Already\n #MLIST\n #MonkeysLIST '
-    post_link = "https://x.com/Degen_Corleone/status/1773403082615120029?s=20"
     login_username = '_monkeypm'
     login_password = 'monkeypm@123'
+    new_data = {}
 
+    done_links = []
+    done_messages = []
 
     try:
-            login_to_twitter(login_username, login_password)
-                           
-            post_function(post_link)
-            like_button()
-            comment_button()
-            try:
-                write_send_msg(message)
-                print('Comment Sent...')
-            except:
-                print("Message not sent")
-            finally:
-                time.sleep(random.randint(3, 5))
+        login_to_twitter(login_username, login_password)
+        
+        while True:
+            data = get_data_list()
+            msg = data['message']
+            link = data['post_link']
+            if link not in done_links:
+                print('link is not available so we raid on:', link)               
+                scrolling_func()
+                post_function(link)
+                like_button()
+                comment_button()
+                try:
+                    write_send_msg(msg)
+                    print('Comment Sent...')
+                except:
+                    print("Message not sent")
+                finally:
+                    time.sleep(random.randint(3, 5))
+                    done_links.append(link)
+                    done_messages.append(msg)
+                    new_data[link] = msg  # Add the new link and message to the dictionary
+                    print('link and msg updated and job is done')
+                    with open('new_data.json', 'a') as json_file:
+                        json.dump(new_data, json_file, indent=4)
+                    print("New data saved to 'new_data.json'")
+            else:
+                print('link not found so we do RANDOM JOB')
+                case = int(random.randint(1,9))
+                switch(case)
                 
     except:
        print('login failed')
