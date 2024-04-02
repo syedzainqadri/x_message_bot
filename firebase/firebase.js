@@ -1,6 +1,9 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const { initializeApp } = require('firebase/app');
+const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
+const { getFirestore, collection, query, where, getDocs } = require('firebase/firestore');
+const fs = require('fs');
 var firebaseConfig = {
     apiKey: "AIzaSyBmb0TAnTBB3dlzAg5EZmy_pf3tfGikbgE",
     authDomain: "monkeyslist-promoters.firebaseapp.com",
@@ -10,44 +13,44 @@ var firebaseConfig = {
     appId: "1:1077736306396:web:0331e814abc18fae28e619",
     measurementId: "G-VWXHY3J50F"
 };
-const initailized = initializeApp(firebaseConfig);
-console.log("Firebase is connected successfully.");
-const db = admin.firestore();
-const auth = admin.auth();
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+
 const app = express();
-const port = process.env.PORT || 3000; // Port from environment or default
 app.use(express.json());
-// Route to handle GET posts request
-app.post('/api/getPosts', async (req, res) => {
-  const { email, password } = req.body;
 
-  try {
-    // Authenticate user and get custom token
-    const userRecord = await auth.getUserByEmail(email);
-    const customToken = await auth.createCustomToken(userRecord.uid);
+// Function to fetch user posts
+async function fetchUserPosts(userId) {
+    const postsRef = collection(db, 'posts');
+    const q = query(postsRef, where('userId', '==', userId));
+    const querySnapshot = await getDocs(q);
+    const posts = querySnapshot.docs.map(doc => doc.data());
+    return posts;
+}
 
-    // Query Firestore for user's posts
-    const postsRef = db.collection('users').doc(userRecord.uid).collection('posts');
-    const snapshot = await postsRef.get();
+// API endpoint to get user's posts
+app.post('/getUserPosts', async (req, res) => {
+    const { email, password } = req.body;
 
-    if (snapshot.empty) {
-      return res.status(404).json({ message: 'No posts found for this user.' });
+    try {
+        // Authenticate the user
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Fetch posts
+        const posts = await fetchUserPosts(user.uid);
+
+        // Save posts to a JSON file
+        fs.writeFileSync('userPosts.json', JSON.stringify(posts, null, 2));
+        res.send({ message: 'Posts fetched successfully', posts });
+    } catch (error) {
+        console.error('Error fetching user posts:', error);
+        res.status(500).send({ message: 'Failed to fetch user posts' });
     }
-
-    let postsData = [];
-    snapshot.forEach(doc => {
-      postsData.push(doc.data());
-    });
-
-    return res.status(200).json({ token: customToken, posts: postsData });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
-  }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-  console.log('Firebase connected successfully'); // Log on server start
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
