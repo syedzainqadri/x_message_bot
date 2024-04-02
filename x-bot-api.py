@@ -73,25 +73,16 @@ driver = webdriver.Chrome()
 #     except Exception as e:
 #         print('Login error:',e)
 
-app = Flask('x-bot-api')
 
-@app.route('/login_to_twitter', methods=['POST'])
-def login_to_twitter_endpoint():
-    login_username = request.json.get('username')
-    login_password = request.json.get('password')
-    
-    # Call out main login function in a if & else statement. 
 
-        # Return error message
-        return jsonify({'error': str(e)})
+
     
- driver = webdriver.Chrome()
+
 
 def login_to_twitter(login_username, login_password):
     try:
-        driver.get("https://twitter.com/i/flow/login")
-        driver.maximize_window()
-        time.sleep(random.randint(15,30))
+        # driver.get("https://twitter.com/i/flow/login")
+        
 
         # Enter username and submit
         input_element = driver.find_element(By.TAG_NAME, 'input')
@@ -113,6 +104,7 @@ def login_to_twitter(login_username, login_password):
         # Return success message
         return jsonify({'message': 'Login successful'})
     except Exception as e:
+       print('login failed due to exception:',e)
        
 def scrolling_func():
 
@@ -316,7 +308,35 @@ def main():
 
 
        
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
-    main() 
+#     # main() 
        
+app = Flask('x-bot-api')
+
+
+
+driver.get('https://twitter.com/i/flow/login')
+# driver.maximize_window()
+time.sleep(random.randint(15,30))
+
+@app.route('/login_to_twitter', methods=['POST'])
+def login_to_twitter_endpoint():
+    print("hello i am here")
+    login_username = request.form.get('login_username')
+    login_password = request.form.get('login_password')
+
+    print(login_username)
+
+    time.sleep(5)
+    
+    # Call out main login function in a if & else statement.
+    if login_username != None:
+        login_to_twitter(login_username,login_password)
+
+
+        return jsonify({'message': 'Actions performed successfully'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+    
