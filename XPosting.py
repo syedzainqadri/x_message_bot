@@ -10,56 +10,34 @@ import json
 
 driver = webdriver.Chrome()
 
-def get_postman_data(api_key):
-    headers = {
-        'X-Api-Key': api_key,
-        'Content-Type': 'application/json'
-    }
 
-    # Replace 'YOUR_COLLECTION_ID' with the actual collection ID you want to retrieve
-    collection_id = '33908320-35644a5b-1ed3-455a-af10-2fffefd24b33'
-    url = f'https://api.postman.com/collections/33908320-c42cb38c-fcd7-4601-ba8e-a735d538b52b?access_key=PMAT-01HTDPNRS2X70QE1V4QXBXYWYM'
+def get_posts_by_bot(bot_id):
+    url = f"http://localhost:3000/posts/by-bot/{bot_id}"
+    headers = {}
+    response = requests.get(url, headers=headers)
     
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse response as JSON
         data = response.json()
+        # Print the JSON response
         return data
-    except requests.exceptions.RequestException as e:
-        print(f"Error: {e}")
+    else:
+        # If the request was not successful, print the status code and error message
+        print(f"Error: {response.status_code} - {response.text}")
         return None
-
-def get_data_list():
-  postman_api_key = 'PMAK-660b181737c5cd0001fe771b-5432c38bc681d2e8cb8d34dcfe635bdead'
-  postman_data = get_postman_data(postman_api_key)
-  if postman_data:
-      print("Data retrieved successfully:")
-      extracted_data = []
-      collection_info = postman_data['collection']
-      items = collection_info['item']
-      for item in items:
-          request = item.get('request', {})
-          body = request.get('body', {})
-          form_data = body.get('formdata', [])
-          data_dict = {}
-          for entry in form_data:
-              data_dict[entry['key']] = entry['value']
-          extracted_data.append(data_dict)
-          return extracted_data[0]
 
 def login_to_twitter(login_username, login_password):
     try:
         driver.get("https://twitter.com/i/flow/login")
         driver.maximize_window()
         time.sleep(random.randint(15,30))
-
     # Enter username and submit
         input_element = driver.find_element(By.TAG_NAME, 'input')
         input_element.send_keys(login_username)
         print('Username Entered')
         time.sleep(random.randint(15,30))
         input_element.send_keys(Keys.RETURN)
-
     # Wait for password field and submit
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, 'password')))
         password_element = driver.find_element(By.NAME, 'password')
@@ -71,7 +49,6 @@ def login_to_twitter(login_username, login_password):
         time.sleep(random.randint(5,8))
     except Exception as e:
         print('Login error:',e)
-
 
 def scrolling_func():
 
@@ -104,10 +81,9 @@ def post_function(post_link):
      driver.get(post_link)
      print('post loading...')
      time.sleep(random.randint(5,10))
-     driver.execute_script(f'window.scrollTo(0,250)')
+     driver.execute_script(f'window.scrollTo(0,300)')
      print('scroll the post')
      time.sleep(random.randint(2,5))
-     
       
 def write_send_msg(message):
     msg_input = driver.execute_script("return document.activeElement;")
@@ -188,87 +164,122 @@ def like_button():
 def repost_button():
     time.sleep(random.randint(5,8))
     try:
-        repost_button = driver.find_element(By.XPATH,"//div[@data-testid='retweet']")
+        repost_button = driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweet"]')
         repost_button.click()     
         time.sleep(random.randint(3,5))
-        fi_click = driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div[2]/div/div[3]/div/div/div/div')
+        fi_click = driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweetConfirm"]')
         print('found by xpath')
         fi_click.click()
         print('Final repost button clicked ')
         time.sleep(random.randint(3,12))
     except:
         print('ALready Reposted')
-    
+        time.sleep(random.randint(4,6))
     finally:
         print('repost  Done')
-        time.sleep(random.randint(4,6))
 
 def comment_button():
     time.sleep(random.randint(3,6))
     try:
 
-        element = driver.find_element(By.XPATH,'//*[@id="id__6w9o1amibzy"]/div[1]/div')
-        print('found by xpath')
+        element = driver.find_element(By.CSS_SELECTOR,'div[data-testid="reply"]')
+        print('found by special selector')
     except:
-        print('failed by xpath')
+        print('failed by special selector')
         try:
             element = driver.find_element(By.CSS_SELECTOR,'#id__6w9o1amibzy > div:nth-child(1) > div')
             print('found by selector')
         except:
             print('failed by selector')
-            try:
-                element = driver.find_element(By.CSS_SELECTOR,'div[data-testid="reply"]')
-                print('found by special selector')
-            except:
-                print('failed by special selector')
-
-               
+    
     element.click()
     print('Commment Button clicked by manual Xpath')
     time.sleep(random.randint(3,5))
 
+def read_env_file(file_path):
+    variables = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Ignore lines that are empty or start with a comment character
+            if not line.strip() or line.strip().startswith('#'):
+                continue
+            key, value = line.strip().split('=', 1)  # Split key and value by the first '=' character
+            variables[key.strip()] = value.strip()
+    return variables
+
 
 def main():
-    
-    login_username = '_monkeypm'
-    login_password = 'monkeypm@123'
-    new_data = {}
 
+    env_file_path = 'user.env'
+    # Read variables from the env file
+    env_variables = read_env_file(env_file_path)
+    # Retrieve username and password from env variables
+    login_username = str(env_variables.get('login_username'))
+    login_password = str(env_variables.get('login_password'))
+    Bot_id = int( env_variables.get('bot_id'))
+    print( login_username,type(login_username),login_password,type(login_password),Bot_id,type(Bot_id))
+    
+    new_data = {}
+    # initializing lists so that compare with already used links and messages
     done_links = []
     done_messages = []
 
     try:
-        login_to_twitter(login_username, login_password)
-        
+        login_to_twitter(login_username, login_password) #loging twitter with the given username and password
+        scrolling_func()
+        # after login and scrolling the home page innitializing the infinite loop 
         while True:
-            data = get_data_list()
-            msg = data['message']
-            link = data['post_link']
-            if link not in done_links:
-                print('link is not available so we raid on:', link)               
-                scrolling_func()
-                post_function(link)
-                like_button()
-                comment_button()
-                try:
-                    write_send_msg(msg)
-                    print('Comment Sent...')
-                except:
-                    print("Message not sent")
-                finally:
-                    time.sleep(random.randint(3, 5))
-                    done_links.append(link)
-                    done_messages.append(msg)
-                    new_data[link] = msg  # Add the new link and message to the dictionary
-                    print('link and msg updated and job is done')
-                    with open('new_data.json', 'a') as json_file:
-                        json.dump(new_data, json_file, indent=4)
-                    print("New data saved to 'new_data.json'")
-            else:
-                print('link not found so we do RANDOM JOB')
+            try:
+                postman_data = get_posts_by_bot(Bot_id)
+                print(postman_data)
+                if postman_data!=None:
+                    for data in postman_data:
+                        link = data['raidLink']
+                        # link = 'https://x.com/monkeyslistio/status/1775586602267357346?s=20'
+                        msg = data['content']
+                        # msg = 'hey monkey you are the best \n#MLIST \n#monkeylist'
+                        print("Raid Link:", link)
+                        print("Content:", msg)
+                        if link not in done_links:   #checking if the  link already used 
+                            print('link is not available so we raid on:', link)     
+                            #perfoming functions for new Post_link     
+                            
+                            post_function(link)
+                            like_button()
+                            repost_button()
+                            comment_button()
+                            try:
+                                write_send_msg(msg)
+                                print('Comment Sent...')
+                            except:
+                                print("Message not sent")
+                            finally:
+                                time.sleep(random.randint(3, 5))
+                                done_links.append(link)
+                                done_messages.append(msg)
+                                new_data[link] = msg  # Add the new link and message to the dictionary
+                                print('link and msg updated and job is done')
+                                with open('new_data.json', 'a') as json_file:
+                                    json.dump(new_data, json_file, indent=4)
+                                print("New data saved to 'new_data.json'")
+                        else: 
+                            #performing random functions if the post_link is already used 
+                            print('link not found so we do RANDOM JOB')
+                            case = int(random.randint(1,9))
+                            switch(case)
+                            print('Repeating')
+                else: 
+                #performing random functions if the post_link is already used 
+                    print('Postman Data not found so we do RANDOM JOB')
+                    case = int(random.randint(1,9))
+                    switch(case)   
+                    print('Again checking')
+            except: 
+                #performing random functions if the post_link is already used 
+                print('Some Error occur so we do RANDOM JOB')
                 case = int(random.randint(1,9))
-                switch(case)
-                
+                switch(case)   
+                print('Again checking')
     except:
        print('login failed')
 
@@ -279,3 +290,4 @@ if __name__ == '__main__':
     
     main() 
        
+
