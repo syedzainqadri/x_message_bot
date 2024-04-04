@@ -30,13 +30,14 @@ def get_posts_by_bot(bot_id):
 def login_to_twitter(login_username, login_password):
     try:
         driver.get("https://twitter.com/i/flow/login")
+        driver.implicitly_wait(15)
         driver.maximize_window()
-        time.sleep(random.randint(15,30))
+        time.sleep(random.randint(5,15))
     # Enter username and submit
         input_element = driver.find_element(By.TAG_NAME, 'input')
         input_element.send_keys(login_username)
         print('Username Entered')
-        time.sleep(random.randint(15,30))
+        time.sleep(random.randint(5,10))
         input_element.send_keys(Keys.RETURN)
     # Wait for password field and submit
         WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, 'password')))
@@ -44,9 +45,9 @@ def login_to_twitter(login_username, login_password):
         time.sleep(3)
         password_element.send_keys(login_password)
         print('Password Entered')
-        time.sleep(random.randint(5,8))
+        time.sleep(random.randint(3,5))
         password_element.send_keys(Keys.RETURN)
-        time.sleep(random.randint(5,8))
+        time.sleep(random.randint(3,5))
     except Exception as e:
         print('Login error:',e)
 
@@ -80,7 +81,7 @@ def log_out():
 def post_function(post_link):
      driver.get(post_link)
      print('post loading...')
-     time.sleep(random.randint(5,10))
+     time.sleep(random.randint(5,8))
      driver.execute_script(f'window.scrollTo(0,300)')
      print('scroll the post')
      time.sleep(random.randint(2,5))
@@ -150,7 +151,7 @@ def switch(case_numb):
   print('numb out of limit')
 
 def like_button():
-    time.sleep(random.randint(5,12))
+    time.sleep(random.randint(5,6))
     print('find like button')
     try:
         like_button= driver.find_element(By.CSS_SELECTOR,'[data-testid="like"]')
@@ -171,7 +172,7 @@ def repost_button():
         print('found by xpath')
         fi_click.click()
         print('Final repost button clicked ')
-        time.sleep(random.randint(3,12))
+        time.sleep(random.randint(3,6))
     except:
         print('ALready Reposted')
         time.sleep(random.randint(4,6))
@@ -225,6 +226,7 @@ def main():
     done_messages = []
 
     try:
+        
         login_to_twitter(login_username, login_password) #loging twitter with the given username and password
         scrolling_func()
         # after login and scrolling the home page innitializing the infinite loop 
