@@ -1,22 +1,30 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
-from selenium.webdriver.common.keys import Keys
 import random
 import requests
-import json
+# Your Twitter credentials
+USERNAME = "_monkeypm"
+PASSWORD = "monkeypm@123"
 
 chrome_options = Options()
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--headless')
-# chrome_options.add_argument('--disable-dev-shm-usage')
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--disable-gpu")  # May help in headless environments
+chrome_options.add_argument("--window-size=1920,1080")  # Standard high-resolution
+chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")  # Use a common user-agent
+chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+chrome_options.add_experimental_option('useAutomationExtension', False)
 
+    # Initialize the driver
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 def get_posts_by_bot(bot_id):
     url = f"http://localhost:3000/posts/by-bot/{bot_id}"
@@ -297,6 +305,4 @@ def main():
        
 if __name__ == '__main__':
     
-    main() 
-       
-
+    main()
