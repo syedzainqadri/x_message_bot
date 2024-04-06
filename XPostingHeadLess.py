@@ -17,22 +17,16 @@ chrome_options.add_argument('--headless')
 # chrome_options.add_argument('--disable-dev-shm-usage')
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
+def login_with_token(driver, auth_token):
+    driver.get("https://twitter.com")
+    print('Without cookie')
 
-def get_posts_by_bot(bot_id):
-    url = f"http://localhost:3000/posts/by-bot/{bot_id}"
-    headers = {}
-    response = requests.get(url, headers=headers)
-    
-    # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        # Parse response as JSON
-        data = response.json()
-        # Print the JSON response
-        return data
-    else:
-        # If the request was not successful, print the status code and error message
-        print(f"Error: {response.status_code} - {response.text}")
-        return None
+    # Add your auth_token to the browser cookies
+    driver.add_cookie({'name': 'token', 'value': auth_token, 'path': '/', 'domain': 'twitter.com'})
+    print('Adding cookie')
+
+    driver.get("https://twitter.com")  # Navigate again to load the page with the auth token
+    print('Success')
 
 def login_to_twitter(login_username, login_password):
     try:
@@ -57,6 +51,23 @@ def login_to_twitter(login_username, login_password):
         time.sleep(random.randint(3,5))
     except Exception as e:
         print('Login error:',e)
+
+def get_posts_by_bot(bot_id):
+    url = f"http://localhost:3000/posts/by-bot/{bot_id}"
+    headers = {}
+    response = requests.get(url, headers=headers)
+    
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse response as JSON
+        data = response.json()
+        # Print the JSON response
+        return data
+    else:
+        # If the request was not successful, print the status code and error message
+        print(f"Error: {response.status_code} - {response.text}")
+        return None
+
 
 def scrolling_func():
 
@@ -225,7 +236,9 @@ def main():
     login_username = str(env_variables.get('login_username'))
     login_password = str(env_variables.get('login_password'))
     Bot_id = int( env_variables.get('bot_id'))
-    print( login_username,type(login_username),login_password,type(login_password),Bot_id,type(Bot_id))
+    auth_token = str(env_variables.get('auth_token'))
+    print( login_username,type(login_username),login_password,type(login_password))
+    print('auth_token',auth_token,'bot_id',Bot_id)
     
     new_data = {}
     # initializing lists so that compare with already used links and messages
@@ -233,8 +246,12 @@ def main():
     done_messages = []
 
     try:
-        
-        login_to_twitter(login_username, login_password) #loging twitter with the given username and password
+        try:
+            login_with_token(driver,auth_token)
+            print('login by token') #loging twitter with the given username and password
+        except:
+            login_to_twitter(login_username,login_password)
+            print('login by user:password')
         scrolling_func()
         # after login and scrolling the home page innitializing the infinite loop 
         while True:
