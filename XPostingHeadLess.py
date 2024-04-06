@@ -225,7 +225,7 @@ def read_env_file(file_path):
             key, value = line.strip().split('=', 1)  # Split key and value by the first '=' character
             variables[key.strip()] = value.strip()
     return variables
-
+driver = webdriver.Chrome()
 
 def main():
 
@@ -248,10 +248,20 @@ def main():
     try:
         try:
             login_with_token(driver,auth_token)
+            driver.execute_script(f'window.scrollTo(0,300)')
+            print('scroll the post')
+            like_button= driver.find_element(By.CSS_SELECTOR,'[data-testid="like"]')
+            print('like button found by special selector')
+            time.sleep(random.randint(2,5))
+            like_button.click()
+            print('Like button clicked by special selector')
             print('login by token') #loging twitter with the given username and password
         except:
             login_to_twitter(login_username,login_password)
             print('login by user:password')
+            driver.execute_script(f'window.scrollTo(0,300)')
+            print('scroll the post')
+            # 7dc310bb4011f716350f599c1e87edf2950c858d
         scrolling_func()
         # after login and scrolling the home page innitializing the infinite loop 
         while True:
@@ -261,9 +271,9 @@ def main():
                 if postman_data!=None:
                     for data in postman_data:
                         link = data['raidLink']
-                        # link = 'https://x.com/monkeyslistio/status/1775586602267357346?s=20'
+                        
                         msg = data['content']
-                        # msg = 'hey monkey you are the best \n#MLIST \n#monkeylist'
+                       
                         print("Raid Link:", link)
                         print("Content:", msg)
                         if link not in done_links:   #checking if the  link already used 
