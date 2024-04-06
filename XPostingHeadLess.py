@@ -22,7 +22,7 @@ def login_with_token(driver, auth_token):
     print('Without cookie')
 
     # Add your auth_token to the browser cookies
-    driver.add_cookie({'name': 'token', 'value': auth_token, 'path': '/', 'domain': 'twitter.com'})
+    driver.add_cookie({'name': 'auth_token', 'value': auth_token, 'path': '/', 'domain': '.twitter.com'})
     print('Adding cookie')
 
     driver.get("https://twitter.com")  # Navigate again to load the page with the auth token
