@@ -114,6 +114,10 @@ def write_send_msg(message):
     time.sleep(random.randint(5,8))
     reply = driver.find_element(By.XPATH,'//*[@id="layers"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[2]/div/div/div/div[2]/div[2]/div/div/div/div[2]/div')
     reply.click()
+    try:
+        driver.find_element(By.XPATH,'//*[@id="layers"]/div[3]/div/div/div/div/div/div[2]/div[2]/div/div[1]/div/div/div/div[1]/div').click()
+    except:
+        print('clear')
     print('reply button clicked by xpath')
     time.sleep(random.randint(8,12))
   
@@ -170,15 +174,27 @@ def switch(case_numb):
 
 def like_button():
     time.sleep(random.randint(5,6))
-    print('find like button')
+    print('finding like button')    
     try:
-        like_button= driver.find_element(By.CSS_SELECTOR,'[data-testid="like"]')
-        print('like button found by special selector')
-        time.sleep(random.randint(2,5))
-        like_button.click()
-        print('Like button clicked by special selector')
+        like_button= driver.find_element(By.xpath,'//*[@data-testid="like"]')
     except:
-       print('Already Liked')
+        try:
+            like_button= driver.find_element(By.xpath,'//div[@data-testid="like" and @role="button"]')
+        except:
+            try:
+                like_button= driver.find_element(By.xpath,'//div[@id="id__nuyabbf1zgb"]/div[@data-testid="like"]')
+            except:
+                like_button = driver.find_element(By.CSS_SELECTOR,'div[data-testid="like"]')
+    print('like button found by special selector')
+    time.sleep(random.randint(2,5))
+    like_button.click()
+    try:
+        driver.find_element(By.XPATH,"//*[@data-testid='app-bar-close']").click()
+    except:
+        print('clear home page')
+
+    print('Like button clicked by special selector')
+    
 
 def repost_button():
     time.sleep(random.randint(5,8))
@@ -186,11 +202,20 @@ def repost_button():
         repost_button = driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweet"]')
         repost_button.click()     
         time.sleep(random.randint(3,5))
+        try:
+            driver.find_element(By.CSS_SELECTOR,'div[data-testid="app-bar-close"]').click()
+        except:
+            print('repost clear')
         fi_click = driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweetConfirm"]')
         print('found by xpath')
         fi_click.click()
-        print('Final repost button clicked ')
         time.sleep(random.randint(3,6))
+        try:
+            driver.find_element(By.CSS_SELECTOR,'div[data-testid="app-bar-close"]').click()
+        except:
+            print('repost clear')
+
+        print('Final repost button clicked ')
     except:
         print('ALready Reposted')
         time.sleep(random.randint(4,6))
@@ -205,11 +230,10 @@ def comment_button():
         print('found by special selector')
     except:
         print('failed by special selector')
-        try:
-            element = driver.find_element(By.CSS_SELECTOR,'#id__6w9o1amibzy > div:nth-child(1) > div')
-            print('found by selector')
-        except:
-            print('failed by selector')
+       
+        element = driver.find_element(By.CSS_SELECTOR,'#id__6w9o1amibzy > div:nth-child(1) > div')
+        print('found by selector')
+       
     
     element.click()
     print('Commment Button clicked by manual Xpath')
@@ -225,7 +249,7 @@ def read_env_file(file_path):
             key, value = line.strip().split('=', 1)  # Split key and value by the first '=' character
             variables[key.strip()] = value.strip()
     return variables
-driver = webdriver.Chrome()
+
 
 def main():
 
@@ -248,20 +272,29 @@ def main():
     try:
         try:
             login_with_token(driver,auth_token)
+            driver.implicitly_wait(10)
             driver.execute_script(f'window.scrollTo(0,300)')
             print('scroll the post')
-            like_button= driver.find_element(By.CSS_SELECTOR,'[data-testid="like"]')
-            print('like button found by special selector')
+            driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweet"]')
+            print('repost button found by special selector')
             time.sleep(random.randint(2,5))
-            like_button.click()
-            print('Like button clicked by special selector')
             print('login by token') #loging twitter with the given username and password
         except:
             login_to_twitter(login_username,login_password)
             print('login by user:password')
             driver.execute_script(f'window.scrollTo(0,300)')
             print('scroll the post')
-            # 7dc310bb4011f716350f599c1e87edf2950c858d
+          
+        time.sleep(2)  # 7dc310bb4011f716350f599c1e87edf2950c858d
+        try:
+            driver.find_element(By.XPATH,"//*[@data-testid='app-bar-close']").click()
+        except:
+            print('clear home page')
+
+        try:
+            driver.find_element(By.CSS_SELECTOR,'div[class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-1mnahxq r-19yznuf r-64el8z r-1dye5f7 r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l"]').click()
+        except:
+            print('clear')
         scrolling_func()
         # after login and scrolling the home page innitializing the infinite loop 
         while True:
@@ -271,9 +304,10 @@ def main():
                 if postman_data!=None:
                     for data in postman_data:
                         link = data['raidLink']
-                        
+                        # link = 'https://x.com/monkeysallday/status/1694011126059565296'   ### static link
                         msg = data['content']
-                       
+                        # msg = "Looks like it's time for a trip to banana town! Curious and excited to see what's going on there." ### static msg
+                        print(type(msg),msg)
                         print("Raid Link:", link)
                         print("Content:", msg)
                         if link not in done_links:   #checking if the  link already used 
@@ -281,15 +315,15 @@ def main():
                             #perfoming functions for new Post_link     
                             
                             post_function(link)
-                            like_button()
+                            try:
+                                like_button()
+                            except:
+                                print('already liked or some error occured')
                             repost_button()
                             comment_button()
                             try:
                                 write_send_msg(msg)
                                 print('Comment Sent...')
-                            except:
-                                print("Message not sent")
-                            finally:
                                 time.sleep(random.randint(3, 5))
                                 done_links.append(link)
                                 done_messages.append(msg)
@@ -298,6 +332,9 @@ def main():
                                 with open('new_data.json', 'a') as json_file:
                                     json.dump(new_data, json_file, indent=4)
                                 print("New data saved to 'new_data.json'")
+                            except:
+                                print("Message not sent")
+                                
                         else: 
                             #performing random functions if the post_link is already used 
                             print('link not found so we do RANDOM JOB')
@@ -326,4 +363,3 @@ if __name__ == '__main__':
     
     main() 
        
-
