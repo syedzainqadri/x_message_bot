@@ -53,7 +53,7 @@ def login_to_twitter(login_username, login_password):
         print('Login error:',e)
 
 def get_posts_by_bot(bot_id):
-    url = f"http://localhost:3000/posts/by-bot/{bot_id}"
+    url = f"http://localhost:3000/posts/by-bot/{bot_id}"    #----add your server host here--------
     headers = {}
     response = requests.get(url, headers=headers)
     
@@ -271,6 +271,7 @@ def main():
 
     try:
         try:
+            #logging by auth_token--------------------
             login_with_token(driver,auth_token)
             driver.implicitly_wait(10)
             driver.execute_script(f'window.scrollTo(0,300)')
@@ -278,14 +279,15 @@ def main():
             driver.find_element(By.CSS_SELECTOR,'div[data-testid="retweet"]')
             print('repost button found by special selector')
             time.sleep(random.randint(2,5))
-            print('login by token') #loging twitter with the given username and password
+            print('login by token') 
         except:
+            #loging twitter with the given username and password
             login_to_twitter(login_username,login_password)
             print('login by user:password')
             driver.execute_script(f'window.scrollTo(0,300)')
             print('scroll the post')
           
-        time.sleep(2)  # 7dc310bb4011f716350f599c1e87edf2950c858d
+        time.sleep(2)  
         try:
             driver.find_element(By.XPATH,"//*[@data-testid='app-bar-close']").click()
         except:
@@ -304,9 +306,9 @@ def main():
                 if postman_data!=None:
                     for data in postman_data:
                         link = data['raidLink']
-                        # link = 'https://x.com/monkeysallday/status/1694011126059565296'   ### static link
+                        # link = 'https://x.com/monkeysallday/status/1694011126059565296'   #------static link------------
                         msg = data['content']
-                        # msg = "Looks like it's time for a trip to banana town! Curious and excited to see what's going on there." ### static msg
+                        # msg = "Looks like it's time for a trip to banana town! Curious and excited to see what's going on there." #---------static msg----------
                         print(type(msg),msg)
                         print("Raid Link:", link)
                         print("Content:", msg)
